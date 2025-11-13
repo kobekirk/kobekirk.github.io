@@ -3,20 +3,21 @@ project:
   output-dir: docs
 
 website:
-  title: "kobekirk.github.io"
+  title: "Kobe Kirk"
   navbar:
     left:
       - href: index.qmd
         text: Home
       - about.qmd
+      - resources.qmd
 
 format:
   html:
     theme:
-      - cosmo
-      - brand
+      - Lux
     css: styles.css
     toc: true
+    page-layout: full
 
 editor: visual
 

@@ -1,11 +1,12 @@
 ---
-title: "kobekirk.github.io"
+title: "Kobe Kirk"
+about: 
+  template: solana
+  links: 
+    - text: LinkedIn
+      href: www.linkedin.com/in/kobekirk
+    - text: Email
+      href: kirk9@stolaf.edu
 ---
 
-This is a Quarto website.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
+Hi everyone, I'm Kobe. I am a senior Quantitative Economics major at St. Olaf College, with concentrations in both Statistics and Data Science and Management Studies. I'm passionate about data analysis and drawing conclusions from data. I play basketball at St. Olaf, but I love all sports, and outside of my studies and sports I enjoy fishing and golfing.
