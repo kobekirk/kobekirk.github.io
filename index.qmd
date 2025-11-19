@@ -1,6 +1,6 @@
 ---
 title: "Kobe Kirk"
-subtitle: "Quantitative Economics and Data Science at St. Olaf College"
+subtitle: "Student-Athlete at St. Olaf College"
 image: bball_headshot.jpg
 toc: false
 about:
