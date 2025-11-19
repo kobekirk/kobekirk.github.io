@@ -4,6 +4,8 @@ code-fold: true
 ---
 
 ```{r}
+#| echo: false
+#| results: "hide"
 library(tidyverse)
 library(tidytext)
 library(textdata)
