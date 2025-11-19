@@ -1,7 +1,11 @@
 ---
 title: "Kobe Kirk"
+image: /Users/kobekirk/Downloads/bball_headshot.jpg
+toc: false
 about: 
   template: solana
+  image-shape: round
+  image-width: 17em
   links: 
     - text: LinkedIn
       href: www.linkedin.com/in/kobekirk
