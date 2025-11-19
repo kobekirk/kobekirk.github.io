@@ -1,15 +1,19 @@
 ---
 title: "Kobe Kirk"
+subtitle: "Quantitative Economics Major · St. Olaf College"
 image: bball_headshot.jpg
 toc: false
-about: 
-  template: solana
+about:
+  template: trestles
   image-shape: round
-  image-width: 15em
-  links: 
-    - text: LinkedIn
+  image-width: 18em
+
+  links:
+    - icon: linkedin
+      text: LinkedIn
       href: https://www.linkedin.com/in/kobekirk
-    - text: Email
+    - icon: envelope
+      text: Email
       href: mailto:kirk9@stolaf.edu
 ---
 
