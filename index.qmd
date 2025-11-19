@@ -3,7 +3,7 @@ title: "Kobe Kirk"
 image: bball_headshot.jpg
 toc: false
 about: 
-  template: jolla
+  template: solana
   image-shape: round
   image-width: 15em
   links: 
