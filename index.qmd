@@ -1,6 +1,6 @@
 ---
 title: "Kobe Kirk"
-subtitle: "Quantitative Economics and Data Science · St. Olaf College"
+subtitle: "Quantitative Economics and Data Science at St. Olaf College"
 image: bball_headshot.jpg
 toc: false
 about:
@@ -18,3 +18,9 @@ about:
 ---
 
 Hi everyone, I'm Kobe. I am a senior Quantitative Economics major at St. Olaf College, with concentrations in both Statistics and Data Science and Management Studies. I'm passionate about data analysis and drawing conclusions from data. I play basketball at St. Olaf, but I love all sports, and outside of my studies and sports I enjoy fishing and golfing.
+
+## Education
+
+- **BA in Quantitative Economics**, St. Olaf College (expected graduation May 2026)  
+  Concentrations: Statistics & Data Science; Management Studies
+
