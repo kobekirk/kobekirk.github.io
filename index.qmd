@@ -1,6 +1,6 @@
 ---
 title: "Kobe Kirk"
-subtitle: "Quantitative Economics Major · St. Olaf College"
+subtitle: "Quantitative Economics and Data Science · St. Olaf College"
 image: bball_headshot.jpg
 toc: false
 about:
