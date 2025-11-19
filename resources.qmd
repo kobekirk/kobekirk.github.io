@@ -76,6 +76,8 @@ pf_words <- pf_words |>
 ```
 
 ```{r}
+#| echo: false
+#| results: "hide"
 # Here I filtered to only the cuss words, and counted them. Realizing some 
 # non-cuss words were included, I filtered those out and reran the code.
 pf_words |>
@@ -178,6 +180,8 @@ ggplot(character_words, aes(x = reorder(character, cuss_words), y = cuss_words))
 ```
 
 ```{r}
+#| echo: false
+#| results: "hide"
 # This code loads in stop words so that I can anti-join them.
 get_stopwords() |> print(n = 50)
 get_stopwords(source = "smart") |> print(n = 50)   
@@ -220,6 +224,8 @@ words_by_character <- pf_words |>
 ## What are each character's most common words, excluding stop words? Do any characters have a cuss word as their most common word?
 
 ```{r}
+#| echo: false
+#| results: "hide"
 # Here I created another new tibble, most_common_by_character, and anti_join it
 # with stop words. Then I group by character and slice_max to the single most 
 # common word of theirs, arranged in descending order.
