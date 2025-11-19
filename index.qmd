@@ -1,6 +1,6 @@
 ---
 title: "Kobe Kirk"
-image: /Users/kobekirk/Downloads/bball_headshot.jpg
+image: GitHub/bball_headshot.jpg
 toc: false
 about: 
   template: solana
