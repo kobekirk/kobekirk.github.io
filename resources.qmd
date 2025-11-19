@@ -1,6 +1,9 @@
 ---
 title: "Mini Project 1"
 code-fold: true
+execute:
+  message: false
+  warning: false
 ---
 
 ```{r}
