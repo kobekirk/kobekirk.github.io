@@ -1,5 +1,5 @@
 ---
-title: "Mini Project 1"
+title: "Mini Project 1: Text Analysis"
 code-fold: true
 execute:
   message: false

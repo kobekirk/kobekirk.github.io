@@ -1,6 +1,199 @@
 ---
-title: "About"
+title: "Mini Project 3: Maps"
 ---
 
-About this site
+```{r}
+library(rvest)
+library(sf)
+library(polite)
+library(viridis)
+library(leaflet)
+library(htmltools)
+library(glue)
+library(tidyverse)
+library(maps)
+library(mdsr)
+library(readr)
+```
 
+```{r}
+nfhs_data <- read.csv("/Users/kobekirk/GitHub/kobekirk.github.io/2024 High School Sports Data.csv", header = TRUE)
+```
+
+```{r}
+nfhs_data_clean <- nfhs_data |>
+  filter(!State %in% c("Alaska", "Hawaii", "Dist. of Columbia")) |>
+  mutate(State = str_to_lower(State),
+         across(-State, parse_number))
+```
+
+```{r}
+#| message: false
+#| warning: false
+
+us_states <- map_data("state")
+head(us_states)
+
+us_states |>
+  ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                          group = group)) + 
+  geom_polygon(fill = "white", color = "black")
+```
+
+```{r}
+nfhs_data_clean <- nfhs_data_clean |>
+  mutate(State = str_replace(State, " state", ""))
+
+nfhs_data_clean |>
+  anti_join(us_states, by = c("State" = "region"))
+
+us_states |>
+  anti_join(nfhs_data_clean, by = c("region" = "State")) %>%
+  count(region)
+```
+
+```{r}
+#| message: false
+#| warning: false
+
+library(viridis) # for color schemes
+nfhs_data_clean |>
+  mutate(
+    State = str_to_lower(State),              
+  ) |>
+  right_join(us_states, by = c("State" = "region")) |>
+  ggplot(aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = Basketball.Players), color = "black") +
+  coord_map() +
+  theme_void() +
+  scale_fill_viridis(option = "plasma") +
+  labs(fill = "Basketball Players per State")
+```
+
+```{r}
+#| message: false
+
+library(sf) #<1>
+states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")  #<2>
+class(states) #<3>
+states
+```
+
+```{r}
+# Create density bins as on the webpage
+state_plotting_sf <- states |>
+  mutate(density_intervals = cut(density, n = 8,
+          breaks = c(0, 10, 20, 50, 100, 200, 500, 1000, Inf))) |>
+  filter(!(name %in% c("Alaska", "Hawaii", "Puerto Rico")))
+
+ggplot(data = state_plotting_sf) + 
+  geom_sf(aes(fill = density_intervals), colour = "white", linetype = 2) + 
+#  geom_sf_label(aes(label = density)) +   # labels too busy here
+  theme_void() +  
+  scale_fill_brewer(palette = "YlOrRd") 
+```
+
+```{r}
+#| message: false
+#| warning: false
+
+# Get info to draw US states for geom_polygon (connect the lat-long points)
+states_polygon <- as_tibble(map_data("state")) |>
+  select(region, group, order, lat, long)
+
+# See what the state (region) levels look like in states_polygon
+unique(states_polygon$region)
+
+
+# Get info to draw US states for geom_sf and leaflet (simple features
+#   object with multipolygon geometry column)
+states_sf <- 
+  read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson") |>
+  select(name, geometry)
+
+# See what the state (name) levels look like in states_sf
+unique(states_sf$name)
+
+
+# See what the state (state_name) levels look like in density_data
+unique(nfhs_data_clean$State)   
+# all lower case plus some extraneous rows
+
+# Make sure all keys have the same format before joining: all lower case
+states_sf <- states_sf |>
+  mutate(name = str_to_lower(name))
+```
+
+```{r}
+# Now we can merge data sets together for the static and the interactive plots
+
+# Merge with states_polygon (static)
+nfhs_polygon <- states_polygon |>
+  left_join(nfhs_data_clean, by = c("region" = "State"))
+nfhs_polygon
+
+# Looks like merge worked for 48 contiguous states plus DC
+nfhs_polygon |>
+  group_by(region) |>
+  summarise(mean = mean(Basketball.Players)) |>
+  print(n = Inf)
+
+# Remove DC since such an outlier
+nfhs_polygon <- nfhs_polygon |>
+  filter(region != "district of columbia")
+
+
+# Merge with states_sf (static or interactive)
+nfhs_sf <- states_sf |>
+  left_join(nfhs_data_clean, by = c("name" = "State")) |>
+  filter(!(name %in% c("alaska", "hawaii", "district of columbia", "puerto rico")))
+
+# Looks like merge worked for 48 contiguous states
+class(nfhs_sf)
+print(nfhs_sf, n = Inf)
+```
+
+```{r}
+#| warning: false
+
+# Create our own category bins for population densities
+#   and assign the yellow-orange-red color palette
+bins <- c(0, 1000, 2000, 5000, 10000, 20000, 40000, 60000, Inf)
+pal <- colorBin("YlOrRd", domain = nfhs_sf$Basketball.Players, bins = bins)
+
+# Create labels that pop up when we hover over a state.  The labels must
+#   be part of a list where each entry is tagged as HTML code.
+nfhs_sf <- nfhs_sf |>
+  mutate(labels = str_c(name, ": ", Basketball.Players, " basketball players"))
+labels <- lapply(nfhs_sf$labels, HTML)
+
+# If want more HTML formatting, use these lines instead of those above:
+# states <- states |>
+#   mutate(labels = glue("<strong>{name}</strong><br/>{density} people / 
+#   mi<sup>2</sup>"))
+# labels <- lapply(states$labels, HTML)
+
+leaflet(nfhs_sf) |>
+  setView(-96, 37.8, 4) |>
+  addTiles() |>
+  addPolygons(
+    fillColor = ~pal(Basketball.Players),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) |>
+  addLegend(pal = pal, values = ~Basketball.Players, opacity = 0.7, title = NULL,
+    position = "bottomright")
+```
