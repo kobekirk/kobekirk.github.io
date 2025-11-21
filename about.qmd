@@ -1,5 +1,9 @@
 ---
 title: "Mini Project 3: Maps"
+code-fold: true
+execute:
+  message: false
+  warning: false
 ---
 
 ```{r}
@@ -17,10 +21,12 @@ library(readr)
 ```
 
 ```{r}
+# Loads the raw NFHS high school sports dataset from a CSV file into R
 nfhs_data <- read.csv("/Users/kobekirk/GitHub/kobekirk.github.io/2024 High School Sports Data.csv", header = TRUE)
 ```
 
 ```{r}
+# Removes states not needed for mapping, converts state names to lowercase, and removes commas from the numbers in the data
 nfhs_data_clean <- nfhs_data |>
   filter(!State %in% c("Alaska", "Hawaii", "Dist. of Columbia")) |>
   mutate(State = str_to_lower(State),
@@ -30,7 +36,7 @@ nfhs_data_clean <- nfhs_data |>
 ```{r}
 #| message: false
 #| warning: false
-
+# Loads built-in polygon coordinates for US states and draws a basic outline map for reference
 us_states <- map_data("state")
 head(us_states)
 
@@ -41,6 +47,7 @@ us_states |>
 ```
 
 ```{r}
+# Cleans remaining inconsistent state names, then checks which states do not successfully match between the NFHS dataset and the base map
 nfhs_data_clean <- nfhs_data_clean |>
   mutate(State = str_replace(State, " state", ""))
 
@@ -55,7 +62,7 @@ us_states |>
 ```{r}
 #| message: false
 #| warning: false
-
+# Joins NFHS data with polygon map data and produces a static choropleth map showing the number of basketball players in each state
 library(viridis) # for color schemes
 nfhs_data_clean |>
   mutate(
@@ -67,7 +74,8 @@ nfhs_data_clean |>
   coord_map() +
   theme_void() +
   scale_fill_viridis(option = "plasma") +
-  labs(fill = "Basketball Players per State")
+  labs(fill = "Number of Players",
+       title = "High School Basketball Players per State")
 ```
 
 ```{r}
@@ -101,7 +109,7 @@ states_sf <-
 unique(states_sf$name)
 
 
-# See what the state (state_name) levels look like in density_data
+# See what the state (state_name) levels look like in nfhs_data_clean
 unique(nfhs_data_clean$State)   
 # all lower case plus some extraneous rows
 
@@ -142,7 +150,7 @@ print(nfhs_sf, n = Inf)
 ```{r}
 #| warning: false
 
-# Create our own category bins for population densities
+# Create our own category bins for number of players
 #   and assign the yellow-orange-red color palette
 bins <- c(0, 1000, 2000, 5000, 10000, 20000, 40000, 60000, Inf)
 pal <- colorBin("YlOrRd", domain = nfhs_sf$Basketball.Players, bins = bins)
@@ -155,13 +163,19 @@ labels <- lapply(nfhs_sf$labels, HTML)
 
 # If want more HTML formatting, use these lines instead of those above:
 # states <- states |>
-#   mutate(labels = glue("<strong>{name}</strong><br/>{density} people / 
+#   mutate(labels = glue("<strong>{name}</strong><br/>{Basketball.Players} people / 
 #   mi<sup>2</sup>"))
 # labels <- lapply(states$labels, HTML)
 
 leaflet(nfhs_sf) |>
   setView(-96, 37.8, 4) |>
   addTiles() |>
+  addControl(
+  html = "<div style='width:100%; text-align:center;'>
+            <h3>High School Basketball Players by State</h3>
+          </div>",
+  position = "topright"
+) |>
   addPolygons(
     fillColor = ~pal(Basketball.Players),
     weight = 2,
@@ -180,10 +194,12 @@ leaflet(nfhs_sf) |>
       style = list("font-weight" = "normal", padding = "3px 8px"),
       textsize = "15px",
       direction = "auto")) |>
-  addLegend(pal = pal, values = ~Basketball.Players, opacity = 0.7, title = NULL,
+  addLegend(pal = pal, values = ~Basketball.Players, opacity = 0.7, title = "Number of Players",
     position = "bottomright")
 ```
+
 ```{r}
+# For each state, finds the sport with the highest number of participants and stores it in a new column called Most.Popular.Sport
 nfhs_data_clean <- nfhs_data_clean |>
   rowwise() |>
   mutate(
@@ -198,7 +214,7 @@ nfhs_data_clean <- nfhs_data_clean |>
 ```{r}
 #| message: false
 #| warning: false
-
+# Creates a categorical static map, where each state is colored by its most popular sport
 library(viridis) # for color schemes
 nfhs_data_clean |>
   right_join(us_states, by = c("State" = "region")) |>
@@ -207,7 +223,8 @@ nfhs_data_clean |>
   coord_map() +
   theme_void() +
   scale_fill_viridis_d(option = "plasma") +
-  labs(fill = "Most Popular Sport")
+  labs(fill = "Sport",
+       title = "Most Popular Boys High School Sport in Each State")
 ```
 
 ```{r}
@@ -237,6 +254,10 @@ labels <- lapply(nfhs_sf$labels, HTML)
 leaflet(nfhs_sf) |>
   setView(-96, 37.8, 4) |>
   addTiles() |>
+  addControl(
+    html = "<h3 style='text-align:center;'>Most Popular Sport by State</h3>",
+    position = "topright"
+  ) |>
   addPolygons(
     fillColor = ~pal(Most.Popular.Sport),
     weight = 2,
