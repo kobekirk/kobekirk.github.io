@@ -49,20 +49,6 @@
     "text": "What are the most common words used in Pulp Fiction, excluding stop words AND cuss words?\n\n\nCode\n# First, I made a new tibble excluding stop words and cuss words, but including\n# not_cuss from earlier. Then I made a wordcloud with the most frequent \n# non-cuss words in the movie.\nall_but_cuss &lt;- pf_words |&gt;\n  anti_join(smart_stopwords) |&gt;\n  filter(!is_cuss, !word %in% not_cuss) |&gt;\n  count(word, sort = TRUE)\n\nwordcloud(\n  words = all_but_cuss$word,\n  freq = all_but_cuss$n,\n  max.words = 50,\n  random.order = FALSE,\n  colors = brewer.pal(6, \"Dark2\")\n)\n\n\n\n\n\n\n\n\n\nAs you can see in the wordcloud above, “gonna” is the most common non-cuss word. Some other common words are “man”, “good”, and “Marsellus”. While I wanted to create a wholesome picture for the audience by excluding cuss words, it’s still true that this wordcloud contains words like “dead”, “fight”, and “gun”. Oh well.\nGoing into this project, I was well aware of the high amount of cuss words used in Pulp Fiction. What I didn’t know was that 2.3% of all words in the entire movie were cuss words. I also didn’t know that Marsellus had almost 6% of his entire dialogue being cuss words, or that Jules used over twice as many cuss words as the next highest character. Those are just a few of the conclusions I was able to draw through my analysis of the Pulp Fiction script."
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Kobe Kirk",
-    "section": "",
-    "text": "Hi everyone, I’m Kobe. I am a senior Quantitative Economics major at St. Olaf College, with concentrations in both Statistics and Data Science and Management Studies. I’m passionate about data analysis and drawing conclusions from data. I play basketball at St. Olaf, but I love all sports, and outside of my studies and sports I enjoy fishing and golfing."
-  },
-  {
-    "objectID": "index.html#education",
-    "href": "index.html#education",
-    "title": "Kobe Kirk",
-    "section": "Education",
-    "text": "Education\n\nBA in Quantitative Economics, St. Olaf College\nConcentrations: Statistics & Data Science; Management Studies\nExpected graduation May 2026"
-  },
-  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "Mini Project 3: Maps",
@@ -93,6 +79,104 @@
   {
     "objectID": "about.html#what-is-the-most-popular-by-participation-sport-in-each-continental-us-state-interactive",
     "href": "about.html#what-is-the-most-popular-by-participation-sport-in-each-continental-us-state-interactive",
+    "title": "Mini Project 3: Maps",
+    "section": "What is the most popular, by participation, sport in each continental US state? (interactive)",
+    "text": "What is the most popular, by participation, sport in each continental US state? (interactive)\n\n\nCode\nnfhs_sf &lt;- states_sf |&gt;\n  left_join(nfhs_data_clean, by = c(\"name\" = \"State\")) |&gt;\n  filter(!(name %in% c(\"alaska\", \"hawaii\", \"district of columbia\", \"puerto rico\")))\n\nsports &lt;- na.omit(unique(nfhs_sf$Most.Popular.Sport))\n\npal &lt;- colorFactor(\n  palette = \"Set3\",   # You can choose another palette if you prefer\n  domain = sports\n)\n\n# Create hover labels\nnfhs_sf &lt;- nfhs_sf |&gt;\n  mutate(\n    labels = str_c(\n      \"&lt;strong&gt;\", name, \"&lt;/strong&gt;&lt;br/&gt;\",\n      \"Most Popular Sport: &lt;strong&gt;\", Most.Popular.Sport, \"&lt;/strong&gt;\"\n    )\n  )\n\nlabels &lt;- lapply(nfhs_sf$labels, HTML)\n\n# Make the interactive Leaflet map\nleaflet(nfhs_sf) |&gt;\n  setView(-96, 37.8, 4) |&gt;\n  addTiles() |&gt;\n  addControl(\n    html = \"&lt;h3 style='text-align:center;'&gt;Most Popular Sport by State&lt;/h3&gt;\",\n    position = \"topright\"\n  ) |&gt;\n  addPolygons(\n    fillColor = ~pal(Most.Popular.Sport),\n    weight = 2,\n    opacity = 1,\n    color = \"white\",\n    dashArray = \"3\",\n    fillOpacity = 0.7,\n    highlightOptions = highlightOptions(\n      weight = 5,\n      color = \"#666\",\n      dashArray = \"\",\n      fillOpacity = 0.7,\n      bringToFront = TRUE\n    ),\n    label = labels,\n    labelOptions = labelOptions(\n      style = list(\"font-weight\" = \"normal\", padding = \"3px 8px\"),\n      textsize = \"15px\",\n      direction = \"auto\"\n    )\n  ) |&gt;\n  addLegend(\n    pal = pal,\n    values = ~Most.Popular.Sport,\n    opacity = 0.7,\n    title = \"Most Popular Sport\",\n    position = \"bottomright\"\n  ) |&gt;\n  addControl(\n    html = \"&lt;div style='font-size:11px; color:gray30;'&gt;\n              Source: NFHS 2024-25 High School Sports Participation Survey\n            &lt;/div&gt;\",\n    position = \"bottomleft\"\n  )"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Kobe Kirk",
+    "section": "",
+    "text": "Hi everyone, I’m Kobe. I am a senior Quantitative Economics major at St. Olaf College, with concentrations in both Statistics and Data Science and Management Studies. I’m passionate about data analysis and drawing conclusions from data. I play basketball at St. Olaf, but I love all sports, and outside of my studies and sports I enjoy fishing and golfing."
+  },
+  {
+    "objectID": "index.html#education",
+    "href": "index.html#education",
+    "title": "Kobe Kirk",
+    "section": "Education",
+    "text": "Education\n\nBA in Quantitative Economics, St. Olaf College\nConcentrations: Statistics & Data Science; Management Studies\nExpected graduation May 2026"
+  },
+  {
+    "objectID": "MP1.html",
+    "href": "MP1.html",
+    "title": "Mini Project 1: Text Analysis",
+    "section": "",
+    "text": "Pulp Fiction (1994) is an American crime film written and directed by renowned filmmaker Quentin Tarantino, starring John Travolta, Samuel L. Jackson, and Uma Thurman, among other notable actors. Set in Los Angeles, the movie portrays four intertwining stories of crime and violence. The film won Best Original Screenplay at the 67th Academy Awards, and received a Rotten Tomatoes score of 92%. It is important to note that Tarantino is well-known for his profound use of cuss words in his films, and specifically Pulp Fiction."
+  },
+  {
+    "objectID": "MP1.html#how-many-total-cuss-words-are-used-in-pulp-fiction",
+    "href": "MP1.html#how-many-total-cuss-words-are-used-in-pulp-fiction",
+    "title": "Mini Project 1: Text Analysis",
+    "section": "How many total cuss words are used in Pulp Fiction?",
+    "text": "How many total cuss words are used in Pulp Fiction?\n\n\nCode\n# Here, I copied the code from the chunk above and added a summarize function \n# to find the total number of cuss words.\npf_words |&gt;\n  filter(is_cuss) |&gt;\n  count(word, sort = TRUE) |&gt;\n  filter(!word %in% c(\"massage\", \"hello\", \"glass\", \"massages\", \"passage\", \n                      \"associates\", \"brass\", \"embarrassed\", \"massaged\")) |&gt;\n  summarize(total_cuss_words = sum(n))\n\n\n  total_cuss_words\n1              332\n\n\nThere are 332 total cuss words used in Pulp Fiction."
+  },
+  {
+    "objectID": "MP1.html#what-is-the-proportion-of-cuss-words-to-normal-words-in-pulp-fiction",
+    "href": "MP1.html#what-is-the-proportion-of-cuss-words-to-normal-words-in-pulp-fiction",
+    "title": "Mini Project 1: Text Analysis",
+    "section": "What is the proportion of cuss words to normal words in Pulp Fiction?",
+    "text": "What is the proportion of cuss words to normal words in Pulp Fiction?\n\n\nCode\n# Here I defined the non-cuss words that were appearing in cuss_words as \n# \"not_cuss.\" Then I created a new tibble, pf_summary, which is a new summary \n# of total words in the movie, total cuss words in the movie, and finally, the\n# proportion of cuss words to total words.\nnot_cuss &lt;- c(\"massage\", \"hello\", \"glass\", \"massages\", \"passage\", \"associates\",\n              \"brass\", \"embarrassed\", \"massaged\")\n\npf_summary &lt;- pf_words |&gt;\n  summarize(\n    total_words = n(),\n    total_cuss_words = sum(is_cuss & !word %in% not_cuss),\n    prop_cuss = total_cuss_words / total_words\n  )\n\npf_summary\n\n\n  total_words total_cuss_words  prop_cuss\n1       14470              332 0.02294402\n\n\nApproximately 2.3% of ALL of the words spoken in Pulp Fiction are cuss words. This equates to about 1 in every 43 words being a cuss word."
+  },
+  {
+    "objectID": "MP1.html#what-character-in-pulp-fiction-says-the-most-cuss-words-what-character-has-the-highest-proportion-of-cuss-words-in-their-dialogue",
+    "href": "MP1.html#what-character-in-pulp-fiction-says-the-most-cuss-words-what-character-has-the-highest-proportion-of-cuss-words-in-their-dialogue",
+    "title": "Mini Project 1: Text Analysis",
+    "section": "What character in Pulp Fiction says the most cuss words? What character has the highest proportion of cuss words in their dialogue?",
+    "text": "What character in Pulp Fiction says the most cuss words? What character has the highest proportion of cuss words in their dialogue?\n\n\nCode\n# Here I am creating a new tibble, character_words. This shows each character's \n# total words, cuss words, and proportion of cuss words. I also filtered out \n# characters that don't have at least 100 words of dialogue.\nnot_cuss &lt;- c(\"massage\", \"hello\", \"glass\", \"massages\", \"passage\", \"associates\",\n              \"brass\", \"embarrassed\", \"massaged\")\n\ncharacter_words &lt;- pf_words |&gt;\n  group_by(character) |&gt;\n  summarize(\n    total_words = n(),\n    cuss_words = sum(is_cuss & !word %in% not_cuss),\n    prop_cuss = cuss_words / total_words\n  ) |&gt;\n  filter(total_words &gt; 100) |&gt;\n  arrange(desc(prop_cuss))\n\ncharacter_words\n\n\n# A tibble: 15 × 4\n   character   total_words cuss_words prop_cuss\n   &lt;chr&gt;             &lt;int&gt;      &lt;int&gt;     &lt;dbl&gt;\n 1 Marsellus           465         27   0.0581 \n 2 Lance               696         31   0.0445 \n 3 Jules              3251        131   0.0403 \n 4 Jody                213          7   0.0329 \n 5 Jimmie              398         13   0.0327 \n 6 Honey Bunny         268          8   0.0299 \n 7 Vincent            2596         57   0.0220 \n 8 Pumpkin             883         19   0.0215 \n 9 Maynard             157          2   0.0127 \n10 Butch              1259         12   0.00953\n11 Capt. Koons         538          5   0.00929\n12 The Wolf           1120          9   0.00804\n13 Fabienne            706          3   0.00425\n14 Mia                1017          4   0.00393\n15 Esmarelda           155          0   0      \n\n\nJules says the most cuss words of any character, using 131 cuss words throughout the movie. However, Marsellus uses the highest proportion of cuss words in the movie, with 5.8% of his total dialogue consisting of cuss words, which equates to approximately 1 of every 17 words Marsellus says being a cuss word.\nHere is a graph that portrays the characters and their corresponding proportion of cuss words.\n\n\nCode\n# Here I used geom_col to plot characters and their proportion of cuss words,\n# filling the bars in blue and labeling the axes and title.\nggplot(character_words, aes(x = reorder(character, prop_cuss), y = prop_cuss)) +\n  geom_col(fill = \"blue\") +\n  coord_flip() +\n  labs(\n    title = \"Proportion of Cuss Words by Characters in Pulp Fiction\",\n    x = \"Character\",\n    y = \"Proportion of Cuss Words\"\n  ) +\n  scale_y_continuous(labels = scales::percent_format())\n\n\n\n\n\n\n\n\n\nHere is a graph that portrays the characters and their corresponding total count of cuss words.\n\n\nCode\n# Here I used geom_col to plot characters and their total number of cuss words,\n# filling the bars in blue and labeling the axes and title.\nggplot(character_words, aes(x = reorder(character, cuss_words), y = cuss_words)) +\n  geom_col(fill = \"blue\") +\n  coord_flip() +\n  labs(\n    title = \"Total Cuss Words by Characters in Pulp Fiction\",\n    x = \"Character\",\n    y = \"Count of Cuss Words\"\n  )"
+  },
+  {
+    "objectID": "MP1.html#is-the-most-common-word-in-pulp-fiction-besides-stop-words-a-cuss-word-how-many-cuss-words-are-in-the-top-10-words-in-pulp-fiction-besides-stop-words",
+    "href": "MP1.html#is-the-most-common-word-in-pulp-fiction-besides-stop-words-a-cuss-word-how-many-cuss-words-are-in-the-top-10-words-in-pulp-fiction-besides-stop-words",
+    "title": "Mini Project 1: Text Analysis",
+    "section": "Is the most common word in Pulp Fiction, besides stop words, a cuss word? How many cuss words are in the top 10 words in Pulp Fiction, besides stop words?",
+    "text": "Is the most common word in Pulp Fiction, besides stop words, a cuss word? How many cuss words are in the top 10 words in Pulp Fiction, besides stop words?\n\n\nCode\n# In this code, I anti-join the stop words with pf_words. Then I count the \n# words, filter out NA as a word, and graph the top 20 most common words using\n# geom_col in a similar style as before.\npf_words |&gt;\n  anti_join(smart_stopwords) |&gt;\n  count(word, sort = TRUE) |&gt;\n  filter(word != \"NA\") |&gt;\n  slice_max(n, n = 20) |&gt;\n  ggplot(aes(fct_reorder(word, n), n)) +\n  geom_col(fill = \"blue\") +\n  coord_flip() +\n    labs(\n    title = \"Most Common Words in Pulp Fiction\",\n    subtitle = \"(excluding stop words)\",\n    x = \"Words\",\n    y = \"Number of Times Spoken\"\n  )\n\n\n\n\n\n\n\n\n\nYes, the most common word, outside of stop words, is a cuss word. In fact, 4 of the 10 most common words in the movie are cuss words!\n\n\nCode\n# Here I create a new tibble, words_by_character, grouping characters with the\n# words they said, and how many times they said that word.\nwords_by_character &lt;- pf_words |&gt;\n  group_by(character, word) |&gt;\n  summarize(n = n(), .groups = \"drop\")"
+  },
+  {
+    "objectID": "MP1.html#what-are-each-characters-most-common-words-excluding-stop-words-do-any-characters-have-a-cuss-word-as-their-most-common-word",
+    "href": "MP1.html#what-are-each-characters-most-common-words-excluding-stop-words-do-any-characters-have-a-cuss-word-as-their-most-common-word",
+    "title": "Mini Project 1: Text Analysis",
+    "section": "What are each character’s most common words, excluding stop words? Do any characters have a cuss word as their most common word?",
+    "text": "What are each character’s most common words, excluding stop words? Do any characters have a cuss word as their most common word?\nJules, played by Samuel L. Jackson, said “shit” 33 times during the film, making that his most frequently used word. His partner in crime, Vincent, also most frequently used a specific cuss word. In fact, 4 characters in the top 10 of most repeated words used a specific cuss word most frequently!"
+  },
+  {
+    "objectID": "MP1.html#what-are-the-most-common-words-used-in-pulp-fiction-excluding-stop-words-and-cuss-words",
+    "href": "MP1.html#what-are-the-most-common-words-used-in-pulp-fiction-excluding-stop-words-and-cuss-words",
+    "title": "Mini Project 1: Text Analysis",
+    "section": "What are the most common words used in Pulp Fiction, excluding stop words AND cuss words?",
+    "text": "What are the most common words used in Pulp Fiction, excluding stop words AND cuss words?\n\n\nCode\n# First, I made a new tibble excluding stop words and cuss words, but including\n# not_cuss from earlier. Then I made a wordcloud with the most frequent \n# non-cuss words in the movie.\nall_but_cuss &lt;- pf_words |&gt;\n  anti_join(smart_stopwords) |&gt;\n  filter(!is_cuss, !word %in% not_cuss) |&gt;\n  count(word, sort = TRUE)\n\nwordcloud(\n  words = all_but_cuss$word,\n  freq = all_but_cuss$n,\n  max.words = 50,\n  random.order = FALSE,\n  colors = brewer.pal(6, \"Dark2\")\n)\n\n\n\n\n\n\n\n\n\nAs you can see in the wordcloud above, “gonna” is the most common non-cuss word. Some other common words are “man”, “good”, and “Marsellus”. While I wanted to create a wholesome picture for the audience by excluding cuss words, it’s still true that this wordcloud contains words like “dead”, “fight”, and “gun”. Oh well.\nGoing into this project, I was well aware of the high amount of cuss words used in Pulp Fiction. What I didn’t know was that 2.3% of all words in the entire movie were cuss words. I also didn’t know that Marsellus had almost 6% of his entire dialogue being cuss words, or that Jules used over twice as many cuss words as the next highest character. Those are just a few of the conclusions I was able to draw through my analysis of the Pulp Fiction script."
+  },
+  {
+    "objectID": "MP3.html",
+    "href": "MP3.html",
+    "title": "Mini Project 3: Maps",
+    "section": "",
+    "text": "For this project, I was interested in looking at nationwide high school sports participation by state. I was able to find publicly available survey data for the 2024-25 school year on the National Federation of State High School Associations (NFHS) website (https://nfhs.org/resources/sports/high-school-participation-survey-archive). One question I will aim to answer and visualize is: What continental US state(s) have the highest participation in boys high school basketball? Another question I will aim to answer and visualize is: What is the most popular, by participation, sport in each continental US state?\n\n\nCode\n# Loads the raw NFHS high school sports dataset from a CSV file into R\nnfhs_data &lt;- read.csv(\"/Users/kobekirk/GitHub/kobekirk.github.io/2024 High School Sports Data.csv\", header = TRUE)\n\n\n\n\nCode\n# Removes states not needed for mapping, converts state names to lowercase, and removes commas from the numbers in the data\nnfhs_data_clean &lt;- nfhs_data |&gt;\n  filter(!State %in% c(\"Alaska\", \"Hawaii\", \"Dist. of Columbia\")) |&gt;\n  mutate(State = str_to_lower(State),\n         across(-State, parse_number))"
+  },
+  {
+    "objectID": "MP3.html#what-continental-us-states-have-the-highest-participation-in-boys-high-school-basketball-static",
+    "href": "MP3.html#what-continental-us-states-have-the-highest-participation-in-boys-high-school-basketball-static",
+    "title": "Mini Project 3: Maps",
+    "section": "What continental US state(s) have the highest participation in boys high school basketball? (static)",
+    "text": "What continental US state(s) have the highest participation in boys high school basketball? (static)\n\n\n\n\n\n\n\n\n\nAs you can see in the plot above, Texas is the state with the most boys high school basketball participants. California has the second-most participants, and after those two states there is a noticeable decrease in boys high school basketball participation."
+  },
+  {
+    "objectID": "MP3.html#what-continental-us-states-have-the-highest-participation-in-boys-high-school-basketball-interactive",
+    "href": "MP3.html#what-continental-us-states-have-the-highest-participation-in-boys-high-school-basketball-interactive",
+    "title": "Mini Project 3: Maps",
+    "section": "What continental US state(s) have the highest participation in boys high school basketball? (interactive)",
+    "text": "What continental US state(s) have the highest participation in boys high school basketball? (interactive)\n\n\nCode\n# Create our own category bins for number of players\n#   and assign the yellow-orange-red color palette\nbins &lt;- c(0, 1000, 2000, 5000, 10000, 20000, 40000, 60000, Inf)\npal &lt;- colorBin(\"YlOrRd\", domain = nfhs_sf$Basketball.Players, bins = bins)\n\n# Create labels that pop up when we hover over a state.  The labels must\n#   be part of a list where each entry is tagged as HTML code.\nnfhs_sf &lt;- nfhs_sf |&gt;\n  mutate(labels = str_c(name, \": \", Basketball.Players, \" basketball players\"))\nlabels &lt;- lapply(nfhs_sf$labels, HTML)\n\n# If want more HTML formatting, use these lines instead of those above:\n# states &lt;- states |&gt;\n#   mutate(labels = glue(\"&lt;strong&gt;{name}&lt;/strong&gt;&lt;br/&gt;{Basketball.Players} people / \n#   mi&lt;sup&gt;2&lt;/sup&gt;\"))\n# labels &lt;- lapply(states$labels, HTML)\n\nleaflet(nfhs_sf) |&gt;\n  setView(-96, 37.8, 4) |&gt;\n  addTiles() |&gt;\n  addControl(\n  html = \"&lt;div style='width:100%; text-align:center;'&gt;\n            &lt;h3&gt;High School Basketball Players by State&lt;/h3&gt;\n          &lt;/div&gt;\",\n  position = \"topright\"\n) |&gt;\n  addPolygons(\n    fillColor = ~pal(Basketball.Players),\n    weight = 2,\n    opacity = 1,\n    color = \"white\",\n    dashArray = \"3\",\n    fillOpacity = 0.7,\n    highlightOptions = highlightOptions(\n      weight = 5,\n      color = \"#666\",\n      dashArray = \"\",\n      fillOpacity = 0.7,\n      bringToFront = TRUE),\n    label = labels,\n    labelOptions = labelOptions(\n      style = list(\"font-weight\" = \"normal\", padding = \"3px 8px\"),\n      textsize = \"15px\",\n      direction = \"auto\")) |&gt;\n  addLegend(pal = pal, values = ~Basketball.Players, opacity = 0.7, title = \"Number of Players\",\n    position = \"bottomright\") |&gt;\n  addControl(\n    html = \"&lt;div style='font-size:11px; color:gray30;'&gt;\n              Source: NFHS 2024-25 High School Sports Participation Survey\n            &lt;/div&gt;\",\n    position = \"bottomleft\"\n  )"
+  },
+  {
+    "objectID": "MP3.html#what-is-the-most-popular-by-participation-sport-in-each-continental-us-state-static",
+    "href": "MP3.html#what-is-the-most-popular-by-participation-sport-in-each-continental-us-state-static",
+    "title": "Mini Project 3: Maps",
+    "section": "What is the most popular, by participation, sport in each continental US state? (static)",
+    "text": "What is the most popular, by participation, sport in each continental US state? (static)\n\n\nCode\n# Creates a categorical static map, where each state is colored by its most popular sport\nlibrary(viridis) # for color schemes\nnfhs_data_clean |&gt;\n  right_join(us_states, by = c(\"State\" = \"region\")) |&gt;\n  ggplot(aes(long, lat, group = group)) +\n  geom_polygon(aes(fill = Most.Popular.Sport), color = \"black\") +\n  coord_map() +\n  theme_void() +\n  scale_fill_viridis_d(option = \"plasma\") +\n  labs(fill = \"Sport\",\n       title = \"Most Popular Boys High School Sport in Each State\",\n       caption = \"Source: NFHS 2024-25 High School Sports Participation Survey\")\n\n\n\n\n\n\n\n\n\nAs you can see in the plot above, football is the most popular boys sport by participation in 43 of the 48 continental United States. Track and Field is the most popular sport among boys in Oregon, Montana, and South Dakota, while Soccer is the most popular sport among boys in Vermont and Maine."
+  },
+  {
+    "objectID": "MP3.html#what-is-the-most-popular-by-participation-sport-in-each-continental-us-state-interactive",
+    "href": "MP3.html#what-is-the-most-popular-by-participation-sport-in-each-continental-us-state-interactive",
     "title": "Mini Project 3: Maps",
     "section": "What is the most popular, by participation, sport in each continental US state? (interactive)",
     "text": "What is the most popular, by participation, sport in each continental US state? (interactive)\n\n\nCode\nnfhs_sf &lt;- states_sf |&gt;\n  left_join(nfhs_data_clean, by = c(\"name\" = \"State\")) |&gt;\n  filter(!(name %in% c(\"alaska\", \"hawaii\", \"district of columbia\", \"puerto rico\")))\n\nsports &lt;- na.omit(unique(nfhs_sf$Most.Popular.Sport))\n\npal &lt;- colorFactor(\n  palette = \"Set3\",   # You can choose another palette if you prefer\n  domain = sports\n)\n\n# Create hover labels\nnfhs_sf &lt;- nfhs_sf |&gt;\n  mutate(\n    labels = str_c(\n      \"&lt;strong&gt;\", name, \"&lt;/strong&gt;&lt;br/&gt;\",\n      \"Most Popular Sport: &lt;strong&gt;\", Most.Popular.Sport, \"&lt;/strong&gt;\"\n    )\n  )\n\nlabels &lt;- lapply(nfhs_sf$labels, HTML)\n\n# Make the interactive Leaflet map\nleaflet(nfhs_sf) |&gt;\n  setView(-96, 37.8, 4) |&gt;\n  addTiles() |&gt;\n  addControl(\n    html = \"&lt;h3 style='text-align:center;'&gt;Most Popular Sport by State&lt;/h3&gt;\",\n    position = \"topright\"\n  ) |&gt;\n  addPolygons(\n    fillColor = ~pal(Most.Popular.Sport),\n    weight = 2,\n    opacity = 1,\n    color = \"white\",\n    dashArray = \"3\",\n    fillOpacity = 0.7,\n    highlightOptions = highlightOptions(\n      weight = 5,\n      color = \"#666\",\n      dashArray = \"\",\n      fillOpacity = 0.7,\n      bringToFront = TRUE\n    ),\n    label = labels,\n    labelOptions = labelOptions(\n      style = list(\"font-weight\" = \"normal\", padding = \"3px 8px\"),\n      textsize = \"15px\",\n      direction = \"auto\"\n    )\n  ) |&gt;\n  addLegend(\n    pal = pal,\n    values = ~Most.Popular.Sport,\n    opacity = 0.7,\n    title = \"Most Popular Sport\",\n    position = \"bottomright\"\n  ) |&gt;\n  addControl(\n    html = \"&lt;div style='font-size:11px; color:gray30;'&gt;\n              Source: NFHS 2024-25 High School Sports Participation Survey\n            &lt;/div&gt;\",\n    position = \"bottomleft\"\n  )"
