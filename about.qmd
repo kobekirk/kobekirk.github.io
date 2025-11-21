@@ -70,6 +70,8 @@ us_states |>
   count(region)
 ```
 
+# Analysis
+
 ## What continental US state(s) have the highest participation in boys high school basketball? (static)
 
 ```{r}
@@ -317,3 +319,7 @@ leaflet(nfhs_sf) |>
     position = "bottomright"
   )
 ```
+
+# Conclusion
+
+The first static and interactive maps help visualize participation in boys high school basketball in each US state. We can see that Texas and California, respectively, have the highest participation. The second static and interactive maps help visualize the most popular sport by participation among high school boys in each state. We can see football as the overwhelming favorite, while a handful of other states prefer Soccer or Track and Field.
