@@ -1,0 +1,339 @@
+---
+title: "Mini Project 3: Maps"
+code-fold: true
+execute:
+  message: false
+  warning: false
+---
+
+```{r}
+#| echo: false
+#| results: "hide"
+library(rvest)
+library(sf)
+library(polite)
+library(viridis)
+library(leaflet)
+library(htmltools)
+library(glue)
+library(tidyverse)
+library(maps)
+library(mdsr)
+library(readr)
+```
+
+# Introduction
+
+For this project, I was interested in looking at nationwide high school sports participation by state. I was able to find publicly available survey data for the 2024-25 school year on the National Federation of State High School Associations (NFHS) website (https://nfhs.org/resources/sports/high-school-participation-survey-archive). One question I will aim to answer and visualize is: What continental US state(s) have the highest participation in boys high school basketball? Another question I will aim to answer and visualize is: What is the most popular, by participation, sport in each continental US state?
+
+```{r}
+# Loads the raw NFHS high school sports dataset from a CSV file into R
+nfhs_data <- read.csv("/Users/kobekirk/GitHub/kobekirk.github.io/2024 High School Sports Data.csv", header = TRUE)
+```
+
+```{r}
+# Removes states not needed for mapping, converts state names to lowercase, and removes commas from the numbers in the data
+nfhs_data_clean <- nfhs_data |>
+  filter(!State %in% c("Alaska", "Hawaii", "Dist. of Columbia")) |>
+  mutate(State = str_to_lower(State),
+         across(-State, parse_number))
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| results: "hide"
+#| fig.show: "hide"
+# Loads built-in polygon coordinates for US states and draws a basic outline map for reference
+us_states <- map_data("state")
+head(us_states)
+
+us_states |>
+  ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                          group = group)) + 
+  geom_polygon(fill = "white", color = "black")
+```
+
+```{r}
+#| echo: false
+#| results: "hide"
+# Cleans remaining inconsistent state names, then checks which states do not successfully match between the NFHS dataset and the base map
+nfhs_data_clean <- nfhs_data_clean |>
+  mutate(State = str_replace(State, " state", ""))
+
+nfhs_data_clean |>
+  anti_join(us_states, by = c("State" = "region"))
+
+us_states |>
+  anti_join(nfhs_data_clean, by = c("region" = "State")) %>%
+  count(region)
+```
+
+# Analysis
+
+## What continental US state(s) have the highest participation in boys high school basketball? (static)
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| results: "hide"
+# Joins NFHS data with polygon map data and produces a static choropleth map showing the number of basketball players in each state
+library(viridis) # for color schemes
+nfhs_data_clean |>
+  mutate(
+    State = str_to_lower(State),              
+  ) |>
+  right_join(us_states, by = c("State" = "region")) |>
+  ggplot(aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = Basketball.Players), color = "black") +
+  coord_map() +
+  theme_void() +
+  scale_fill_viridis(option = "plasma") +
+  labs(fill = "Number of Players",
+       title = "High School Basketball Players per State",
+       caption = "Source: NFHS 2024-25 High School Sports Participation Survey")
+```
+As you can see in the plot above, Texas is the state with the most boys high school basketball participants. California has the second-most participants, and after those two states there is a noticeable decrease in boys high school basketball participation.
+
+```{r}
+#| message: false
+#| echo: false
+#| results: "hide"
+#| fig.show: "hide"
+library(sf) #<1>
+states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")  #<2>
+invisible(class(states)) #<3>
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| results: "hide"
+
+# Get info to draw US states for geom_polygon (connect the lat-long points)
+states_polygon <- as_tibble(map_data("state")) |>
+  select(region, group, order, lat, long)
+
+# See what the state (region) levels look like in states_polygon
+unique(states_polygon$region)
+
+
+# Get info to draw US states for geom_sf and leaflet (simple features
+#   object with multipolygon geometry column)
+states_sf <- 
+  read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson") |>
+  select(name, geometry)
+
+# See what the state (name) levels look like in states_sf
+unique(states_sf$name)
+
+
+# See what the state (state_name) levels look like in nfhs_data_clean
+unique(nfhs_data_clean$State)   
+# all lower case plus some extraneous rows
+
+# Make sure all keys have the same format before joining: all lower case
+states_sf <- states_sf |>
+  mutate(name = str_to_lower(name))
+```
+
+```{r}
+#| echo: false
+#| results: "hide"
+# Now we can merge data sets together for the static and the interactive plots
+
+# Merge with states_polygon (static)
+nfhs_polygon <- states_polygon |>
+  left_join(nfhs_data_clean, by = c("region" = "State"))
+nfhs_polygon
+
+# Looks like merge worked for 48 contiguous states plus DC
+nfhs_polygon |>
+  group_by(region) |>
+  summarise(mean = mean(Basketball.Players)) |>
+  print(n = Inf)
+
+# Remove DC since such an outlier
+nfhs_polygon <- nfhs_polygon |>
+  filter(region != "district of columbia")
+
+
+# Merge with states_sf (static or interactive)
+nfhs_sf <- states_sf |>
+  left_join(nfhs_data_clean, by = c("name" = "State")) |>
+  filter(!(name %in% c("alaska", "hawaii", "district of columbia", "puerto rico")))
+
+# Looks like merge worked for 48 contiguous states
+class(nfhs_sf)
+print(nfhs_sf, n = Inf)
+```
+
+## What continental US state(s) have the highest participation in boys high school basketball? (interactive)
+
+```{r}
+#| warning: false
+
+# Create our own category bins for number of players
+#   and assign the yellow-orange-red color palette
+bins <- c(0, 1000, 2000, 5000, 10000, 20000, 40000, 60000, Inf)
+pal <- colorBin("YlOrRd", domain = nfhs_sf$Basketball.Players, bins = bins)
+
+# Create labels that pop up when we hover over a state.  The labels must
+#   be part of a list where each entry is tagged as HTML code.
+nfhs_sf <- nfhs_sf |>
+  mutate(labels = str_c(name, ": ", Basketball.Players, " basketball players"))
+labels <- lapply(nfhs_sf$labels, HTML)
+
+# If want more HTML formatting, use these lines instead of those above:
+# states <- states |>
+#   mutate(labels = glue("<strong>{name}</strong><br/>{Basketball.Players} people / 
+#   mi<sup>2</sup>"))
+# labels <- lapply(states$labels, HTML)
+
+leaflet(nfhs_sf) |>
+  setView(-96, 37.8, 4) |>
+  addTiles() |>
+  addControl(
+  html = "<div style='width:100%; text-align:center;'>
+            <h3>High School Basketball Players by State</h3>
+          </div>",
+  position = "topright"
+) |>
+  addPolygons(
+    fillColor = ~pal(Basketball.Players),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) |>
+  addLegend(pal = pal, values = ~Basketball.Players, opacity = 0.7, title = "Number of Players",
+    position = "bottomright") |>
+  addControl(
+    html = "<div style='font-size:11px; color:gray30;'>
+              Source: NFHS 2024-25 High School Sports Participation Survey
+            </div>",
+    position = "bottomleft"
+  )
+```
+
+```{r}
+#| echo: false
+#| results: "hide"
+# For each state, finds the sport with the highest number of participants and stores it in a new column called Most.Popular.Sport
+nfhs_data_clean <- nfhs_data_clean |>
+  rowwise() |>
+  mutate(
+    Most.Popular.Sport = cur_data() |> 
+      select(ends_with("Players")) |> 
+      {\(.) names(.)[which.max(unlist(.))] }(),
+    Most.Popular.Sport = str_remove(Most.Popular.Sport, "\\.Players$")
+  ) |>
+  ungroup()
+```
+
+## What is the most popular, by participation, sport in each continental US state? (static)
+
+```{r}
+#| message: false
+#| warning: false
+# Creates a categorical static map, where each state is colored by its most popular sport
+library(viridis) # for color schemes
+nfhs_data_clean |>
+  right_join(us_states, by = c("State" = "region")) |>
+  ggplot(aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = Most.Popular.Sport), color = "black") +
+  coord_map() +
+  theme_void() +
+  scale_fill_viridis_d(option = "plasma") +
+  labs(fill = "Sport",
+       title = "Most Popular Boys High School Sport in Each State",
+       caption = "Source: NFHS 2024-25 High School Sports Participation Survey")
+```
+As you can see in the plot above, football is the most popular boys sport by participation in 43 of the 48 continental United States. Track and Field is the most popular sport among boys in Oregon, Montana, and South Dakota, while Soccer is the most popular sport among boys in Vermont and Maine.
+
+## What is the most popular, by participation, sport in each continental US state? (interactive)
+
+```{r}
+nfhs_sf <- states_sf |>
+  left_join(nfhs_data_clean, by = c("name" = "State")) |>
+  filter(!(name %in% c("alaska", "hawaii", "district of columbia", "puerto rico")))
+
+sports <- na.omit(unique(nfhs_sf$Most.Popular.Sport))
+
+pal <- colorFactor(
+  palette = "Set3",   # You can choose another palette if you prefer
+  domain = sports
+)
+
+# Create hover labels
+nfhs_sf <- nfhs_sf |>
+  mutate(
+    labels = str_c(
+      "<strong>", name, "</strong><br/>",
+      "Most Popular Sport: <strong>", Most.Popular.Sport, "</strong>"
+    )
+  )
+
+labels <- lapply(nfhs_sf$labels, HTML)
+
+# Make the interactive Leaflet map
+leaflet(nfhs_sf) |>
+  setView(-96, 37.8, 4) |>
+  addTiles() |>
+  addControl(
+    html = "<h3 style='text-align:center;'>Most Popular Sport by State</h3>",
+    position = "topright"
+  ) |>
+  addPolygons(
+    fillColor = ~pal(Most.Popular.Sport),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE
+    ),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto"
+    )
+  ) |>
+  addLegend(
+    pal = pal,
+    values = ~Most.Popular.Sport,
+    opacity = 0.7,
+    title = "Most Popular Sport",
+    position = "bottomright"
+  ) |>
+  addControl(
+    html = "<div style='font-size:11px; color:gray30;'>
+              Source: NFHS 2024-25 High School Sports Participation Survey
+            </div>",
+    position = "bottomleft"
+  )
+```
+
+# Conclusion
+
+The first static and interactive maps help visualize participation in boys high school basketball in each US state. We can see that Texas and California, respectively, have the highest participation. The second static and interactive maps help visualize the most popular sport by participation among high school boys in each state. We can see football as the overwhelming favorite, while a handful of other states prefer Soccer or Track and Field.

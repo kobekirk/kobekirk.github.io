@@ -8,8 +8,8 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - resources.qmd
-      - about.qmd
+      - MP1.qmd
+      - MP3.qmd
 
 format:
   html:
