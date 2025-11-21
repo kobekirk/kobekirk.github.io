@@ -40,6 +40,7 @@ nfhs_data_clean <- nfhs_data |>
 #| warning: false
 #| echo: false
 #| results: "hide"
+#| fig.show: "hide"
 # Loads built-in polygon coordinates for US states and draws a basic outline map for reference
 us_states <- map_data("state")
 head(us_states)
@@ -68,6 +69,8 @@ us_states |>
 ```{r}
 #| message: false
 #| warning: false
+#| echo: false
+#| results: "hide"
 # Joins NFHS data with polygon map data and produces a static choropleth map showing the number of basketball players in each state
 library(viridis) # for color schemes
 nfhs_data_clean |>
