@@ -95,7 +95,6 @@ nfhs_data_clean |>
 library(sf) #<1>
 states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")  #<2>
 class(states) #<3>
-states
 ```
 
 ```{r}
