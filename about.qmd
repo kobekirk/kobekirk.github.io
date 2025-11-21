@@ -7,6 +7,8 @@ execute:
 ---
 
 ```{r}
+#| echo: false
+#| results: "hide"
 library(rvest)
 library(sf)
 library(polite)
@@ -36,6 +38,8 @@ nfhs_data_clean <- nfhs_data |>
 ```{r}
 #| message: false
 #| warning: false
+#| echo: false
+#| results: "hide"
 # Loads built-in polygon coordinates for US states and draws a basic outline map for reference
 us_states <- map_data("state")
 head(us_states)
@@ -47,6 +51,8 @@ us_states |>
 ```
 
 ```{r}
+#| echo: false
+#| results: "hide"
 # Cleans remaining inconsistent state names, then checks which states do not successfully match between the NFHS dataset and the base map
 nfhs_data_clean <- nfhs_data_clean |>
   mutate(State = str_replace(State, " state", ""))
@@ -80,7 +86,8 @@ nfhs_data_clean |>
 
 ```{r}
 #| message: false
-
+#| echo: false
+#| results: "hide"
 library(sf) #<1>
 states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")  #<2>
 class(states) #<3>
@@ -90,6 +97,8 @@ states
 ```{r}
 #| message: false
 #| warning: false
+#| echo: false
+#| results: "hide"
 
 # Get info to draw US states for geom_polygon (connect the lat-long points)
 states_polygon <- as_tibble(map_data("state")) |>
@@ -119,6 +128,8 @@ states_sf <- states_sf |>
 ```
 
 ```{r}
+#| echo: false
+#| results: "hide"
 # Now we can merge data sets together for the static and the interactive plots
 
 # Merge with states_polygon (static)
@@ -199,6 +210,8 @@ leaflet(nfhs_sf) |>
 ```
 
 ```{r}
+#| echo: false
+#| results: "hide"
 # For each state, finds the sport with the highest number of participants and stores it in a new column called Most.Popular.Sport
 nfhs_data_clean <- nfhs_data_clean |>
   rowwise() |>
