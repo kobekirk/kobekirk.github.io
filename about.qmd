@@ -22,6 +22,10 @@ library(mdsr)
 library(readr)
 ```
 
+# Introduction
+
+For this project, I was interested in looking at nationwide high school sports participation by state. I was able to find publicly available survey data for the 2024-25 school year on the National Federation of State High School Associations (NFHS) website (https://nfhs.org/resources/sports/high-school-participation-survey-archive). One question I will aim to answer and visualize is: What continental US state(s) have the highest participation in boys high school basketball? Another question I will aim to answer and visualize is: What is the most popular, by participation, sport in each continental US state?
+
 ```{r}
 # Loads the raw NFHS high school sports dataset from a CSV file into R
 nfhs_data <- read.csv("/Users/kobekirk/GitHub/kobekirk.github.io/2024 High School Sports Data.csv", header = TRUE)
@@ -66,6 +70,8 @@ us_states |>
   count(region)
 ```
 
+## What continental US state(s) have the highest participation in boys high school basketball? (static)
+
 ```{r}
 #| message: false
 #| warning: false
@@ -86,6 +92,7 @@ nfhs_data_clean |>
   labs(fill = "Number of Players",
        title = "High School Basketball Players per State")
 ```
+As you can see in the plot above, Texas is the state with the most boys high school basketball participants. California has the second-most participants, and after those two states there is a noticeable decrease in boys high school basketball participation.
 
 ```{r}
 #| message: false
@@ -94,7 +101,7 @@ nfhs_data_clean |>
 #| fig.show: "hide"
 library(sf) #<1>
 states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")  #<2>
-class(states) #<3>
+invisible(class(states)) #<3>
 ```
 
 ```{r}
@@ -160,6 +167,8 @@ nfhs_sf <- states_sf |>
 class(nfhs_sf)
 print(nfhs_sf, n = Inf)
 ```
+
+## What continental US state(s) have the highest participation in boys high school basketball? (interactive)
 
 ```{r}
 #| warning: false
@@ -227,6 +236,8 @@ nfhs_data_clean <- nfhs_data_clean |>
   ungroup()
 ```
 
+## What is the most popular, by participation, sport in each continental US state? (static)
+
 ```{r}
 #| message: false
 #| warning: false
@@ -242,6 +253,9 @@ nfhs_data_clean |>
   labs(fill = "Sport",
        title = "Most Popular Boys High School Sport in Each State")
 ```
+As you can see in the plot above, football is the most popular boys sport by participation in 43 of the 48 continental United States. Track and Field is the most popular sport among boys in Oregon, Montana, and South Dakota, while Soccer is the most popular sport among boys in Vermont and Maine.
+
+## What is the most popular, by participation, sport in each continental US state? (interactive)
 
 ```{r}
 nfhs_sf <- states_sf |>
