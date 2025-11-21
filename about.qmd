@@ -92,7 +92,8 @@ nfhs_data_clean |>
   theme_void() +
   scale_fill_viridis(option = "plasma") +
   labs(fill = "Number of Players",
-       title = "High School Basketball Players per State")
+       title = "High School Basketball Players per State",
+       caption = "Source: NFHS 2024-25 High School Sports Participation Survey")
 ```
 As you can see in the plot above, Texas is the state with the most boys high school basketball participants. California has the second-most participants, and after those two states there is a noticeable decrease in boys high school basketball participation.
 
@@ -220,7 +221,13 @@ leaflet(nfhs_sf) |>
       textsize = "15px",
       direction = "auto")) |>
   addLegend(pal = pal, values = ~Basketball.Players, opacity = 0.7, title = "Number of Players",
-    position = "bottomright")
+    position = "bottomright") |>
+  addControl(
+    html = "<div style='font-size:11px; color:gray30;'>
+              Source: NFHS 2024-25 High School Sports Participation Survey
+            </div>",
+    position = "bottomleft"
+  )
 ```
 
 ```{r}
@@ -253,7 +260,8 @@ nfhs_data_clean |>
   theme_void() +
   scale_fill_viridis_d(option = "plasma") +
   labs(fill = "Sport",
-       title = "Most Popular Boys High School Sport in Each State")
+       title = "Most Popular Boys High School Sport in Each State",
+       caption = "Source: NFHS 2024-25 High School Sports Participation Survey")
 ```
 As you can see in the plot above, football is the most popular boys sport by participation in 43 of the 48 continental United States. Track and Field is the most popular sport among boys in Oregon, Montana, and South Dakota, while Soccer is the most popular sport among boys in Vermont and Maine.
 
@@ -317,6 +325,12 @@ leaflet(nfhs_sf) |>
     opacity = 0.7,
     title = "Most Popular Sport",
     position = "bottomright"
+  ) |>
+  addControl(
+    html = "<div style='font-size:11px; color:gray30;'>
+              Source: NFHS 2024-25 High School Sports Participation Survey
+            </div>",
+    position = "bottomleft"
   )
 ```
 
